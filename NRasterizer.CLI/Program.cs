@@ -58,7 +58,7 @@ namespace NRasterizer.CLI
             {
                 FontSize = 64
             };
-            var raster = new Raster(width, height, width, 72);
+            var raster = new Raster(width, height, width, resolution);
 
             using (var input = fontPath.OpenRead())
             {
