@@ -12,6 +12,12 @@ namespace NRasterizer
         private readonly double _multiplyer;
         private readonly double _divisor;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Renderer"/> class.
+        /// </summary>
+        /// <param name="typeface">The typeface.</param>
+        /// <param name="rasterizer">The rasterizer.</param>
+        /// <param name="options">The options.</param>
         public Renderer(Typeface typeface, IGlyphRasterizer rasterizer, RendererOptions options)
         {
             _options = options;
@@ -21,6 +27,12 @@ namespace NRasterizer
             _divisor = EmSquare.Size / _options.FontSize;
         }
 
+        /// <summary>
+        /// Renders the specified glyph at the specified X and Y position.
+        /// </summary>
+        /// <param name="x">The x postion in pixels to draw the glyph.</param>
+        /// <param name="y">The y postion in pixels to draw the glyph.</param>
+        /// <param name="text">The glyph.</param>
         public void RenderGlyph(double x, double y, Glyph glyph)
         {
             x = x * _divisor / _multiplyer;
@@ -190,11 +202,23 @@ namespace NRasterizer
             return new Point<int>((v1.x + v2.x) / 2, (v1.y + v2.y) / 2);
         }
 
+        /// <summary>
+        /// Renders the specified text at the specified X and Y position.
+        /// </summary>
+        /// <param name="x">The x postion in pixels to draw the text.</param>
+        /// <param name="y">The y postion in pixels to draw the text.</param>
+        /// <param name="text">The text.</param>
+        /// <returns>The size of the rendered text in pixels.</returns>
         public Size Render(int x, int y, string text)
         {
             return Render(x, y, text, true);
         }
-        
+
+        /// <summary>
+        /// Measures the specified text in pixels,
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <returns>The size of the text in pixels os though it was rendered.</returns>
         public Size Measure(string text)
         {
             return Render(0, 0, text, false);
