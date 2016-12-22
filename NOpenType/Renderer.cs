@@ -6,31 +6,31 @@ namespace NRasterizer
     public class Renderer
     {
         private const int PointsPerInch = 72;
-        private const int Scaler = EmSquare.Size * PointsPerInch;
         private readonly IGlyphRasterizer _rasterizer;
         private readonly Typeface _typeface;
-        
-        private const double FT_RESIZE = 64; //essential to be floating point
         private readonly RendererOptions _options;
-        
-        private readonly int _multiplyer;
+        private readonly double _multiplyer;
+        private readonly double _divisor;
 
         public Renderer(Typeface typeface, IGlyphRasterizer rasterizer, RendererOptions options)
         {
             _options = options;
-            _multiplyer = _options.FontSize * _options.Resolution;
             _typeface = typeface;
             _rasterizer = rasterizer;
+            _multiplyer = rasterizer.Resolution / PointsPerInch;
+            _divisor = EmSquare.Size / _options.FontSize;
         }
 
-        public void RenderGlyph(int x, int y, Glyph glyph)
+        public void RenderGlyph(double x, double y, Glyph glyph)
         {
-            RenderGlyph(x, y, _multiplyer, Scaler, glyph);
+            x = x * _divisor / _multiplyer;
+            y = y * _divisor / _multiplyer;
+            RenderGlyph(x, y, _multiplyer, _divisor, glyph);
         }
 
-        internal void RenderGlyph(int x, int y, int multiplier, int scaler, Glyph glyph)
+        internal void RenderGlyph(double x, double y, double multiplier, double divisor, Glyph glyph)
         {
-            var rasterizer = new ToPixelRasterizer(x, y, multiplier, scaler, _rasterizer);
+            var rasterizer = new ToPixelRasterizer(x, y, multiplier, divisor, _rasterizer);
 
             ushort[] contours = glyph.EndPoints;
             short[] xs = glyph.X;
@@ -190,14 +190,9 @@ namespace NRasterizer
             return new Point<int>((v1.x + v2.x) / 2, (v1.y + v2.y) / 2);
         }
 
-        private int ToPixels(int funits, int pointSize, int dpi)
+        public Size Render(int x, int y, string text)
         {
-            return funits * pointSize * dpi / Scaler;
-        }
-
-        public void Render(int x, int y, string text)
-        {
-            Render(x, y, text, true);
+            return Render(x, y, text, true);
         }
         
         public Size Measure(string text)
@@ -205,14 +200,25 @@ namespace NRasterizer
             return Render(0, 0, text, false);
         }
 
+        private double GetAdvanceWidth(char character)
+        {
+            return (_typeface.GetAdvanceWidth(character) * _multiplyer / _divisor);
+        }
+
+        private double GetLineDrawHeight()
+        {
+            var drawheightEM = _typeface.Bounds.YMax - _typeface.Bounds.YMin;
+            var drawheightPX = drawheightEM * _multiplyer / _divisor; // convert back to pixel space
+
+            return drawheightPX;
+        }
+
         private Size Render(int x, int y, string text, bool renderGlyph)
         {
-            int xx = x * Scaler;
-            int yy = y * Scaler;
-            var height = _typeface.Bounds.YMax - _typeface.Bounds.YMin;
-            var lineheight = height * _multiplyer / Scaler; //???
-            
-            int width = 0;
+            double xx = x;
+            double yy = y;
+
+            double width = 0;
             foreach (var character in text)
             {
                 var glyph = _typeface.Lookup(character);
@@ -221,8 +227,8 @@ namespace NRasterizer
                 {
                     RenderGlyph(xx, yy, glyph);
                 }
-                
-                xx += _typeface.GetAdvanceWidth(character);
+
+                xx += GetAdvanceWidth(character);
 
                 if (xx > width)
                 {
@@ -235,10 +241,12 @@ namespace NRasterizer
                 _rasterizer.Flush();
             }
 
+            var yDiff = (yy - y);
+
             return new Size()
             {
-                Height = lineheight,
-                Width = width * _multiplyer / Scaler
+                Height = (int)(GetLineDrawHeight() + yDiff), //add the full draw height to the offset of the last draw position.
+                Width = (int) width 
             };
         }
     }

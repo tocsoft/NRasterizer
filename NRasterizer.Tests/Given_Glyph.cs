@@ -18,6 +18,7 @@ namespace NRasterizer.Tests
         public void SetUp()
         {
             _mock = new Mock<IGlyphRasterizer>(MockBehavior.Strict);
+            _mock.Setup(x => x.Resolution).Returns(0); // rasterizers resoltion is read early on.
             _sequence = new MockSequence();
             _mock.InSequence(_sequence).Setup(r => r.BeginRead(1));
             _renderer = new Renderer(null, _mock.Object, new RendererOptions());

@@ -14,6 +14,8 @@ namespace NRasterizer.Rasterizer
             _flags = new Raster(_target.Width, _target.Height, _target.Stride, _target.Resolution);
         }
 
+        public int Resolution => _target.Resolution;
+
         private void RenderFlags(Raster scanFlags, Raster target)
         {
             var source = scanFlags.Pixels;

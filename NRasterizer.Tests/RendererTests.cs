@@ -15,8 +15,11 @@ namespace NRasterizer.Tests
         [TestCase("Hello World", 64, 350, 84)]
         public void MesureText(string text, int fontSize, int expectedWidth, int expectedHeight)
         {
-            var typeface = TestFonts.OpenSans_Regular;
             var mockRasterizer = new Mock<IGlyphRasterizer>();
+            mockRasterizer.Setup(x => x.Resolution).Returns(72); // rasterizer is responsible for the resolution
+
+            var typeface = TestFonts.OpenSans_Regular;
+
             var options = new RendererOptions()
             {
                 FontSize = fontSize

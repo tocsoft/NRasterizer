@@ -2,18 +2,18 @@
 
 namespace NRasterizer
 {
-    public class ToPixelRasterizer: IGlyphRasterizer
+    public class ToPixelRasterizer
     {
         private readonly IGlyphRasterizer _inner;
-        private readonly float _x;
-        private readonly float _y;
-        private readonly int _m;
-        private readonly int _d;
+        private readonly double _x;
+        private readonly double _y;
+        private readonly double _m;
+        private readonly double _d;
 
-        public ToPixelRasterizer(float x, float y, int multiplyer, int divider, IGlyphRasterizer inner)
+        public ToPixelRasterizer(double x, double y, double multiplyer, double divider, IGlyphRasterizer inner)
         {
             _x = x;
-            _y = y;
+            _y = y + EmSquare.Size;
             _m = multiplyer;
             _d = divider;
             _inner = inner;
@@ -25,7 +25,7 @@ namespace NRasterizer
         }
         private double Y(double y)
         {
-            return _m * (_y + EmSquare.Size - y) / _d;
+            return _m * (_y - y) / _d;
         }
 
         #region IGlyphRasterizer implementation
