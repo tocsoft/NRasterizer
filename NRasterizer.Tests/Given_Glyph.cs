@@ -20,7 +20,7 @@ namespace NRasterizer.Tests
             _mock = new Mock<IGlyphRasterizer>(MockBehavior.Strict);
             _sequence = new MockSequence();
             _mock.InSequence(_sequence).Setup(r => r.BeginRead(1));
-            _renderer = new Renderer(null, _mock.Object);
+            _renderer = new Renderer(null, _mock.Object, new RendererOptions());
         }
 
         [TearDown]

@@ -6,20 +6,31 @@ namespace NRasterizer
     public class Renderer
     {
         private const int PointsPerInch = 72;
+        private const int Scaler = EmSquare.Size * PointsPerInch;
         private readonly IGlyphRasterizer _rasterizer;
         private readonly Typeface _typeface;
-        private const int pointsPerInch = 72;
+        
         private const double FT_RESIZE = 64; //essential to be floating point
+        private readonly RendererOptions _options;
+        
+        private readonly int _multiplyer;
 
-        public Renderer(Typeface typeface, IGlyphRasterizer rasterizer)
+        public Renderer(Typeface typeface, IGlyphRasterizer rasterizer, RendererOptions options)
         {
+            _options = options;
+            _multiplyer = _options.FontSize * _options.Resolution;
             _typeface = typeface;
             _rasterizer = rasterizer;
         }
 
-        public void RenderGlyph(int x, int y, int m, int d, Glyph glyph)
+        public void RenderGlyph(int x, int y, Glyph glyph)
         {
-            var rasterizer = new ToPixelRasterizer(x, y, m, d, _rasterizer);
+            RenderGlyph(x, y, _multiplyer, Scaler, glyph);
+        }
+
+        internal void RenderGlyph(int x, int y, int multiplier, int scaler, Glyph glyph)
+        {
+            var rasterizer = new ToPixelRasterizer(x, y, multiplier, scaler, _rasterizer);
 
             ushort[] contours = glyph.EndPoints;
             short[] xs = glyph.X;
@@ -181,21 +192,54 @@ namespace NRasterizer
 
         private int ToPixels(int funits, int pointSize, int dpi)
         {
-            return funits * pointSize * dpi / (EmSquare.Size * pointsPerInch);
+            return funits * pointSize * dpi / Scaler;
         }
 
-        public void Render(int x, int y, string text, int size, int resolution)
+        public void Render(int x, int y, string text)
         {
-            int xx = x * EmSquare.Size * PointsPerInch;
-            int yy = y * EmSquare.Size * PointsPerInch;
-            int m = size * resolution;
-            int d = EmSquare.Size * PointsPerInch;
+            Render(x, y, text, true);
+        }
+        
+        public Size Measure(string text)
+        {
+            return Render(0, 0, text, false);
+        }
+
+        private Size Render(int x, int y, string text, bool renderGlyph)
+        {
+            int xx = x * Scaler;
+            int yy = y * Scaler;
+            var height = _typeface.Bounds.YMax - _typeface.Bounds.YMin;
+            var lineheight = height * _multiplyer / Scaler; //???
+            
+            int width = 0;
             foreach (var character in text)
             {
-                RenderGlyph(xx, yy, m, d, _typeface.Lookup(character));
+                var glyph = _typeface.Lookup(character);
+
+                if (renderGlyph)
+                {
+                    RenderGlyph(xx, yy, glyph);
+                }
+                
                 xx += _typeface.GetAdvanceWidth(character);
+
+                if (xx > width)
+                {
+                    width = xx;
+                }
             }
-            _rasterizer.Flush();
+
+            if (renderGlyph)
+            {
+                _rasterizer.Flush();
+            }
+
+            return new Size()
+            {
+                Height = lineheight,
+                Width = width * _multiplyer / Scaler
+            };
         }
     }
 

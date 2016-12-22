@@ -53,21 +53,24 @@ namespace NRasterizer.CLI
         {
             const int width = 200;
             const int height = 80;
-            const int Size = 64;
-            const int Resolution = 72;
+            var options = new RendererOptions()
+            {
+                FontSize = 64,
+                Resolution = 72
+            };
             var raster = new Raster(width, height, width, 72);
 
             using (var input = fontPath.OpenRead())
             {
                 var typeface = new OpenTypeReader().Read(input);
                 var rasterizer = new Rasterizer.Rasterizer(raster);
-                var renderer = new Renderer(typeface, rasterizer);
-                renderer.Render(0, 0, text, Size, Resolution);
+                var renderer = new Renderer(typeface, rasterizer, options);
+                renderer.Render(0, 0, text);
             }
 
             using (Bitmap b = new Bitmap(width, height, PixelFormat.Format8bppIndexed))
             {
-                b.SetResolution(Resolution, Resolution);
+                b.SetResolution(options.Resolution, options.Resolution);
                 Grayscale(b);
                 BlitTo(raster, b);
                 b.Save(target.FullName, ImageFormat.Png);
@@ -78,21 +81,24 @@ namespace NRasterizer.CLI
         {
             const int width = 200;
             const int height = 80;
-            const int Size = 64;
-            const int Resolution = 72;
+            var options = new RendererOptions()
+            {
+                FontSize = 64,
+                Resolution = 72
+            };
 
             using (var input = fontPath.OpenRead())
             {
                 var typeface = new OpenTypeReader().Read(input);
                 using (Bitmap b = new Bitmap(width, height, PixelFormat.Format32bppArgb))
                 {
-                    b.SetResolution(Resolution, Resolution);
+                    b.SetResolution(options.Resolution, options.Resolution);
                     using (var g = Graphics.FromImage(b))
                     {
                         g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                         var rasterizer = new GDIGlyphRasterizer(g, Brushes.Black);
-                        var renderer = new Renderer(typeface, rasterizer);
-                        renderer.Render(0, 0, text, Size, Resolution);
+                        var renderer = new Renderer(typeface, rasterizer, options);
+                        renderer.Render(0, 0, text);
                     }
                     b.Save(target.FullName, ImageFormat.Png);
                 }
@@ -120,7 +126,7 @@ namespace NRasterizer.CLI
             var rasterizerName = args[0];
             var fontPath = new FileInfo(args[1]);
             var target = new FileInfo(args[2]);
-            var text = args[3];
+            var text = args[3].Replace("\\n", "\n").Replace("\\t", "\t");
 
           
             var program = new NRasterizerProgram();

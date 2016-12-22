@@ -57,7 +57,9 @@
     <Compile Include="Rasterizer\Raster.cs" />
     <Compile Include="Rasterizer\Rasterizer.cs" />
     <Compile Include="Rasterizer\Segment.cs" />
+    <Compile Include="RendererOptions.cs" />
     <Compile Include="Renderer.cs" />
+    <Compile Include="Size.cs" />
     <Compile Include="Tables\BoundsReader.cs" />
     <Compile Include="Tables\CmapReader.cs" />
     <Compile Include="Tables\Glyf.cs" />
