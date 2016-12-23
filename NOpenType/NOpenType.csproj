@@ -57,7 +57,6 @@
     <Compile Include="Rasterizer\Raster.cs" />
     <Compile Include="Rasterizer\Rasterizer.cs" />
     <Compile Include="Rasterizer\Segment.cs" />
-    <Compile Include="RendererOptions.cs" />
     <Compile Include="Renderer.cs" />
     <Compile Include="Size.cs" />
     <Compile Include="Tables\BoundsReader.cs" />
@@ -69,6 +68,7 @@
     <Compile Include="Tables\HorizontalMetrics.cs" />
     <Compile Include="Tables\MaxProfile.cs" />
     <Compile Include="Tables\TableEntry.cs" />
+    <Compile Include="TextOptions.cs" />
     <Compile Include="ToPixelRasterizer.cs" />
     <Compile Include="Transformation.cs" />
     <Compile Include="Typeface.cs" />
