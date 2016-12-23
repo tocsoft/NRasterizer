@@ -12,12 +12,12 @@ namespace NRasterizer
     internal struct ToPixelRasterizer
     {
         private readonly IGlyphRasterizer _inner;
-        private readonly double _x;
-        private readonly double _y;
-        private readonly double _m;
-        private readonly double _d;
+        private readonly float _x;
+        private readonly float _y;
+        private readonly int _m;
+        private readonly int _d;
 
-        public ToPixelRasterizer(double x, double y, double multiplyer, double divider, IGlyphRasterizer inner)
+        public ToPixelRasterizer(int x, int y, int multiplyer, int divider, IGlyphRasterizer inner)
         {
             _x = x;
             _y = y + EmSquare.Size;

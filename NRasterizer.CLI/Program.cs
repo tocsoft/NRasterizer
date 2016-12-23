@@ -54,7 +54,7 @@ namespace NRasterizer.CLI
             const int width = 200;
             const int height = 80;
             const int resolution = 72;
-            var options = new RendererOptions()
+            var options = new TextOptions()
             {
                 FontSize = 64
             };
@@ -64,8 +64,8 @@ namespace NRasterizer.CLI
             {
                 var typeface = new OpenTypeReader().Read(input);
                 var rasterizer = new Rasterizer.Rasterizer(raster);
-                var renderer = new Renderer(typeface, rasterizer, options);
-                renderer.Render(0, 0, text);
+                var renderer = new Renderer(typeface, rasterizer);
+                renderer.Render(0, 0, text, options);
             }
 
             using (Bitmap b = new Bitmap(width, height, PixelFormat.Format8bppIndexed))
@@ -82,7 +82,7 @@ namespace NRasterizer.CLI
             const int width = 200;
             const int height = 80;
             const int resolution = 72;
-            var options = new RendererOptions()
+            var options = new TextOptions()
             {
                 FontSize = 64
             };
@@ -100,8 +100,8 @@ namespace NRasterizer.CLI
                         g.Clear(Color.White);
                         g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                         var rasterizer = new GDIGlyphRasterizer(g, resolution, Brushes.Black);
-                        var renderer = new Renderer(typeface, rasterizer, options);
-                        var size = renderer.Render(x, y, text);
+                        var renderer = new Renderer(typeface, rasterizer);
+                        var size = renderer.Render(x, y, text, options);
 
                         if (drawbox)
                         {

@@ -20,14 +20,14 @@ namespace NRasterizer.Tests
 
             var typeface = TestFonts.OpenSans_Regular;
 
-            var options = new RendererOptions()
+            var options = new TextOptions()
             {
                 FontSize = fontSize
             };
 
-            var renderer = new Renderer(typeface, mockRasterizer.Object, options);
+            var renderer = new Renderer(typeface, mockRasterizer.Object);
 
-            var size = renderer.Measure(text);
+            var size = renderer.Measure(text, options);
             Assert.AreEqual(expectedWidth, size.Width);
             Assert.AreEqual(expectedHeight, size.Height);
         }

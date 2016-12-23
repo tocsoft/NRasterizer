@@ -8,39 +8,14 @@ namespace NRasterizer
         private const int PointsPerInch = 72;
         private readonly IGlyphRasterizer _rasterizer;
         private readonly Typeface _typeface;
-        private readonly RendererOptions _options;
-        private readonly double _multiplyer;
-        private readonly double _divisor;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Renderer"/> class.
-        /// </summary>
-        /// <param name="typeface">The typeface.</param>
-        /// <param name="rasterizer">The rasterizer.</param>
-        /// <param name="options">The options.</param>
-        public Renderer(Typeface typeface, IGlyphRasterizer rasterizer, RendererOptions options)
+        public Renderer(Typeface typeface, IGlyphRasterizer rasterizer)
         {
-            _options = options;
             _typeface = typeface;
             _rasterizer = rasterizer;
-            _multiplyer = rasterizer.Resolution / PointsPerInch;
-            _divisor = EmSquare.Size / _options.FontSize;
         }
 
-        /// <summary>
-        /// Renders the specified glyph at the specified X and Y position.
-        /// </summary>
-        /// <param name="x">The x postion in pixels to draw the glyph.</param>
-        /// <param name="y">The y postion in pixels to draw the glyph.</param>
-        /// <param name="text">The glyph.</param>
-        public void RenderGlyph(double x, double y, Glyph glyph)
-        {
-            x = x * _divisor / _multiplyer;
-            y = y * _divisor / _multiplyer;
-            RenderGlyph(x, y, _multiplyer, _divisor, glyph);
-        }
-
-        internal void RenderGlyph(double x, double y, double multiplier, double divisor, Glyph glyph)
+        internal void RenderGlyph(int x, int y, int multiplier, int divisor, Glyph glyph)
         {
             var rasterizer = new ToPixelRasterizer(x, y, multiplier, divisor, _rasterizer);
 
@@ -91,7 +66,7 @@ namespace NRasterizer
                                 case 2:
                                     {
                                         rasterizer.Curve4(
-                                                secondControlPoint.x,  secondControlPoint.y,
+                                                secondControlPoint.x, secondControlPoint.y,
                                                 thirdControlPoint.x, thirdControlPoint.y,
                                                 vpoint_x, vpoint_y);
                                     }
@@ -209,9 +184,9 @@ namespace NRasterizer
         /// <param name="y">The y postion in pixels to draw the text.</param>
         /// <param name="text">The text.</param>
         /// <returns>The size of the rendered text in pixels.</returns>
-        public Size Render(int x, int y, string text)
+        public Size Render(int x, int y, string text, TextOptions options)
         {
-            return Render(x, y, text, true);
+            return ProcessText(x, y, text, options, true);
         }
 
         /// <summary>
@@ -219,28 +194,22 @@ namespace NRasterizer
         /// </summary>
         /// <param name="text">The text.</param>
         /// <returns>The size of the text in pixels os though it was rendered.</returns>
-        public Size Measure(string text)
+        public Size Measure(string text, TextOptions options)
         {
-            return Render(0, 0, text, false);
+            return ProcessText(0, 0, text, options, false);
         }
 
-        private double GetAdvanceWidth(char character)
+        private Size ProcessText(int x, int y, string text, TextOptions options, bool renderGlyph)
         {
-            return (_typeface.GetAdvanceWidth(character) * _multiplyer / _divisor);
-        }
+            //we are working a font sizes in here
+            //convert from pixel sizes to font sizes
+            int multiplyer = _rasterizer.Resolution / PointsPerInch;
+            int divisor = EmSquare.Size / options.FontSize;
+            int xx = (int)(x * divisor) / multiplyer;
+            int yy = (int)(y * divisor) / multiplyer;
 
-        private double GetLineDrawHeight()
-        {
+
             var drawheightEM = _typeface.Bounds.YMax - _typeface.Bounds.YMin;
-            var drawheightPX = drawheightEM * _multiplyer / _divisor; // convert back to pixel space
-
-            return drawheightPX;
-        }
-
-        private Size Render(int x, int y, string text, bool renderGlyph)
-        {
-            double xx = x;
-            double yy = y;
 
             double width = 0;
             foreach (var character in text)
@@ -249,10 +218,9 @@ namespace NRasterizer
 
                 if (renderGlyph)
                 {
-                    RenderGlyph(xx, yy, glyph);
+                    RenderGlyph(xx, yy, multiplyer, divisor, glyph);
                 }
-
-                xx += GetAdvanceWidth(character);
+                xx += _typeface.GetAdvanceWidth(character);
 
                 if (xx > width)
                 {
@@ -267,10 +235,11 @@ namespace NRasterizer
 
             var yDiff = (yy - y);
 
+            // convert back to pixel size from font sizes
             return new Size()
             {
-                Height = (int)(GetLineDrawHeight() + yDiff), //add the full draw height to the offset of the last draw position.
-                Width = (int) width 
+                Height = (int)(drawheightEM + yDiff) * multiplyer / divisor, //add the full draw height to the offset of the last draw position.
+                Width = (int)(width * multiplyer) / divisor
             };
         }
     }
