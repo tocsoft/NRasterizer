@@ -46,9 +46,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CharacterMapTests.cs" />
+    <Compile Include="TestFactory.cs" />
     <Compile Include="Given_Glyph.cs" />
     <Compile Include="RendererTests.cs" />
-    <Compile Include="TestFonts.cs" />
     <Compile Include="OpenTypeReaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

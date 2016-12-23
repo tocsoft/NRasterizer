@@ -12,22 +12,21 @@ namespace NRasterizer.Tests
     public class RendererTests
     {
         [Test]
-        [TestCase("Hello World", 64, 350, 84)]
+        [TestCase("Hello World", 64, 704, 64)] //pixel size == font size in these tests
+        [TestCase("Hello", 10, 50, 10)] //pixel size == font size in these tests
+        [TestCase("World", 10, 50, 10)] //pixel size == font size in these tests
         public void MesureText(string text, int fontSize, int expectedWidth, int expectedHeight)
         {
-            var mockRasterizer = new Mock<IGlyphRasterizer>();
-            mockRasterizer.Setup(x => x.Resolution).Returns(72); // rasterizer is responsible for the resolution
-
-            var typeface = TestFonts.OpenSans_Regular;
+            // the default test factory will end up faking out spacing for a monospaced font.
+            var renderer = TestFactory.CreateRenderer(text);
 
             var options = new TextOptions()
             {
                 FontSize = fontSize
             };
 
-            var renderer = new Renderer(typeface, mockRasterizer.Object);
-
             var size = renderer.Measure(text, options);
+
             Assert.AreEqual(expectedWidth, size.Width);
             Assert.AreEqual(expectedHeight, size.Height);
         }

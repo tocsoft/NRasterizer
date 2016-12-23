@@ -12,12 +12,22 @@ namespace NRasterizer.Tests
     [TestFixture]
     public class OpenTypeReaderTests
     {
+        private string rootFolder;
+
+        [SetUp]
+        public void Setup()
+        {
+            this.rootFolder = Path.GetDirectoryName(new Uri(typeof(OpenTypeReaderTests).Assembly.Location).LocalPath);
+        }
+
+        public static IEnumerable<string> AllFonts => new[] { "OpenSans-Regular.ttf", "segoeui.ttf", "CompositeMS.ttf" };
+
         [Test]
-        [TestCaseSource(typeof(TestFonts), "AllFonts")]
-        public void LoadingFontReturnsATypeface(string path)
+        [TestCaseSource("AllFonts")]
+        public void LoadingFontReturnsATypeface(string filename)
         {
             var reader = new OpenTypeReader();
-            using (var fs = File.OpenRead(path))
+            using (var fs = File.OpenRead($"{rootFolder}/TestFonts/{filename}"))
             {
                 var typeface = reader.Read(fs);
 
